@@ -1,0 +1,27 @@
+## a mettre dans /etc/rc.local pour activation a chaque redemarrage ##
+
+# Set the URL of the GitLab repository
+REPO_URL=https://gitlab.com/your_username/your_repo.git
+
+# Set the name of the branch you want to use
+BRANCH=master
+
+# Go to the root directory
+cd /
+
+# Clone the repository
+git clone $REPO_URL
+
+# Go to the repository directory
+cd your_repo
+
+# Checkout the specified branch
+git checkout $BRANCH
+
+# Pull the latest changes from the repository
+git pull
+
+# Run any necessary updates or installations
+./update.sh
+
+exit 0
