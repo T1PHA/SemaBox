@@ -4,7 +4,7 @@ import requests
 import subprocess
 from scapy.all import *
 import urllib.request
-import nmap
+from tkinter import messagebox
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -21,31 +21,43 @@ def get_ip():
 def get_hostname():
     return socket.gethostname()
 
-def get_public_ip():
-    response = requests.get('http://checkip.dyndns.org')
-    return response.text.split(': ')[-1].strip()
+def get_recover_info():
+        ip = requests.get('https://api.ipify.org').text
+        hostname = socket.gethostname()
+        frame_ip = tk.Frame(root, bd=2, relief="groove")
+        frame_ip.pack(padx=10, pady=10, fill="x")
 
-def get_dynamic_dns():
-    response = requests.get('http://checkip.dyndns.org/dynamicdns.html')
-    return response.text.split('Dynamic DNS : ')[-1].split('<')[0]
+        label_ip_title = tk.Label(frame_ip, text="Adresse IP publique et nom de domaine", font=("Helvetica", 14, "bold"))
+        label_ip_title.pack(pady=5)
+        result_label = tk.Label(frame_ip, text=f"{ip}\n{hostname}", font=("Helvetica", 12))
+        result_label.pack()
 
 #scan réseau
 # appel de la fonction pour afficher la liste des noms de machines
 
-
-root = tk.Tk()
-label_titre = tk.Label(root, text=f'Bienvenue sur le tableau de bord de votre SemaOS')
-label_titre.pack(side="top")
-
-# Fonction qui met à jour le label avec la latence de ping
 def check_internet_connection():
+    frame_ip = tk.Frame(root, bd=2, relief="groove")
+    frame_ip.pack(padx=10, pady=10, fill="x")
+
+    label_ip_title = tk.Label(frame_ip, text="Etat de la connexion", font=("Helvetica", 14, "bold"))
+    label_ip_title.pack(pady=5)
+    
     try:
         # essayer de se connecter à un site web connu
         urllib.request.urlopen("http://www.google.com")
-        label = tk.Label(root, text="Votre machine est connectée à Internet.")
+        label = tk.Label(frame_ip, text="Votre machine est connectée à Internet.", font=("Helvetica", 14, "bold"), fg='green')
     except:
-        label = tk.Label(root, text="Votre machine n'est pas connectée à Internet.")
+        label = tk.Label(frame_ip, text="Votre machine n'est pas connectée à Internet.", font=("Helvetica", 14, "bold"), fg='red')
     label.pack()
+    
+    
+root = tk.Tk()
+label_titre = tk.Label(root, text=f'Bienvenue sur le tableau de bord de votre SemaOS', font=("Helvetica", 16))
+label_titre.pack(side="top")
+root.configure(bg='#E8F0F2') # Changer la couleur de fond de la fenêtre
+label_titre.configure(fg='#4D4D4D') # Changer la couleur du texte
+# Fonction qui met à jour le label avec la latence de ping
+
 
 # appel de la fonction pour vérifier la connexion Internet
 
@@ -59,19 +71,35 @@ def check_internet_connection():
 
 # lancement de la boucle principale Tkinter
 
-label_ip = tk.Label(root, text=f'IP: {get_ip()}')
-label_ip.pack()
+frame_ip = tk.Frame(root, bd=2, relief="groove")
+frame_ip.pack(padx=10, pady=10, fill="x")
 
-label_hostname = tk.Label(root, text=f'Hostname: {get_hostname()}')
+label_ip_title = tk.Label(frame_ip, text="Adresse IP", font=("Helvetica", 14, "bold"))
+label_ip_title.pack(pady=5)
+
+label_ip = tk.Label(frame_ip, text=f'{get_ip()}', font=("Helvetica", 12))
+label_ip.pack(pady=5)
+
+
+frame_ip = tk.Frame(root, bd=2, relief="groove")
+frame_ip.pack(padx=10, pady=10, fill="x")
+
+label_ip_title = tk.Label(frame_ip, text="Nom", font=("Helvetica", 14, "bold"))
+label_ip_title.pack(pady=5)
+
+label_hostname = tk.Label(frame_ip, text=f'{get_hostname()}', font=("Helvetica", 12))
 label_hostname.pack()
-check_internet_connection()
-label_latency = tk.Label(root, text='')
-label_latency.pack()
 
-label_ip = tk.Label(root, text=f'Public IP: {get_public_ip()}')
-label_ip.pack()
-label_dns = tk.Label(root, text=f'Dynamic DNS: {get_dynamic_dns()}')
-label_dns.pack()
+
+
+
+check_internet_connection()
+
+
+
+get_recover_info()
+
+
 
 url = "http://speedtest.ftp.otenet.gr/files/test100k.db"
 
@@ -96,8 +124,12 @@ def start_speedtest():
   speed = size_in_bytes / duration
 
   # Affichage de la vitesse de téléchargement en Mo/s dans une nouvelle fenêtre
+  frame_ip = tk.Frame(root, bd=2, relief="groove")
+  frame_ip.pack(padx=10, pady=10, fill="x")
 
-  result_label = tk.Label(root, text=f"Vitesse de téléchargement : {speed / 1024 / 1024:.2f} Mo/s")
+  label_ip_title = tk.Label(frame_ip, text="Vitesse de téléchargement", font=("Helvetica", 14, "bold"))
+  label_ip_title.pack(pady=5)
+  result_label = tk.Label(frame_ip, text=f"{speed / 1024 / 1024:.2f} Mo/s", font=("Helvetica", 12))
   result_label.pack()
 
 start_speedtest()
@@ -115,8 +147,13 @@ for ip in socket.gethostbyname_ex(host)[2]:
 machines_str = ip_list
 
 # afficher la liste des machines dans un label
-label = tk.Label(root, text=f'Machines détectées dans le réseau: {machines_str}')
+frame_ip = tk.Frame(root, bd=2, relief="groove")
+frame_ip.pack(padx=10, pady=10, fill="x")
+
+label_ip_title = tk.Label(frame_ip, text="Machines détectées dans le réseau", font=("Helvetica", 14, "bold"))
+label_ip_title.pack(pady=5)
+label = tk.Label(frame_ip, text=f'{machines_str}', font=("Helvetica", 12))
 label.pack()
 
-root.geometry("400x300")
+root.geometry("600x500")
 root.mainloop()
