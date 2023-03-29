@@ -1,6 +1,7 @@
 import socket
 import threading
 import tkinter as tk
+from scapy.all import ARP, Ether, srp
 
 class PortScanner:
     root = tk.Tk()
@@ -29,6 +30,8 @@ class PortScanner:
         self.result_text = tk.Text(self.master)
         self.result_text.pack()
 
+    
+    # Récupération de l'adresse IP entrée
     def scan_ports(self):
         # Récupération de l'adresse IP entrée
         ip = self.ip_entry.get()
@@ -47,18 +50,19 @@ class PortScanner:
     host = socket.gethostname()
     
     # obtenir la liste des noms de machines dans le réseau local
-    ip_list = []
-    for ip in socket.gethostbyname_ex(host)[2]:
-        if not ip.startswith("127."):
-            ip_list.append(ip)
+    arp = ARP(pdst="192.168.29.0/24")
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result_text = tk.Text(root)
+    # Envoi de la requête ARP et récupération des réponses
+    result = srp(packet, timeout=3, verbose=0)[0]
 
-    # créer une chaîne de caractères avec les noms de machines séparés par des sauts de ligne
-    machines_str = "\n".join(ip_list)
+    # Affichage des adresses MAC et IP des machines qui ont répondu
+    for sent, received in result:
+        result_text.insert(tk.END, f"MAC Address: {received.hwsrc} - IP Address: {received.psrc}\n")
+    result_text.pack()
 
-    # afficher la liste des machines dans un label
-    label = tk.Label(root, text=f'Machines détectées dans le réseau:\n {machines_str}')
-    label.pack()
-
+    root.geometry("500x200")
     root.mainloop()
 
     def scan_port(self, ip, port):
@@ -79,4 +83,6 @@ class PortScanner:
             
 root = tk.Tk()
 scanner = PortScanner(root)
+root.geometry("300x300")
 root.mainloop()
+

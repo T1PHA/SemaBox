@@ -5,6 +5,7 @@ import subprocess
 from scapy.all import *
 import urllib.request
 from tkinter import messagebox
+from scapy.all import ARP, Ether, srp
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -138,22 +139,39 @@ start_speedtest()
 host = socket.gethostname()
 
 # obtenir la liste des noms de machines dans le réseau local
-ip_list = []
-for ip in socket.gethostbyname_ex(host)[2]:
-    if not ip.startswith("127."):
-        ip_list.append(ip)
+
+
+def scan_network():
+    frame_ip = tk.Frame(root, bd=2, relief="groove")
+    frame_ip.pack(padx=10, pady=10, fill="x")
+
+    label_ip_title = tk.Label(frame_ip, text="Machines dans le réseau ", font=("Helvetica", 14, "bold"))
+    
+    
+    # Création d'une requête ARP
+    arp = ARP(pdst="192.168.29.0/24")
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result_text = tk.Text(root)
+    # Envoi de la requête ARP et récupération des réponses
+    result = srp(packet, timeout=3, verbose=0)[0]
+
+    # Affichage des adresses MAC et IP des machines qui ont répondu
+    for sent, received in result:
+        result_text.insert(tk.END, f"MAC Address: {received.hwsrc} - IP Address: {received.psrc}\n")
+    
+    result_text.pack()
+    label_ip_title.pack()
+# Lancement du scan à l'ouverture de la fenêtre
+scan_network()
+
 
 # créer une chaîne de caractères avec les noms de machines séparés par des sauts de ligne
-machines_str = ip_list
+
 
 # afficher la liste des machines dans un label
-frame_ip = tk.Frame(root, bd=2, relief="groove")
-frame_ip.pack(padx=10, pady=10, fill="x")
 
-label_ip_title = tk.Label(frame_ip, text="Machines détectées dans le réseau", font=("Helvetica", 14, "bold"))
-label_ip_title.pack(pady=5)
-label = tk.Label(frame_ip, text=f'{machines_str}', font=("Helvetica", 12))
-label.pack()
 
-root.geometry("600x500")
+root.geometry("700x600")
 root.mainloop()
+
